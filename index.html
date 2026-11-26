@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<base target="_blank">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Мої задачі</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg: #f4f4f7; --card: #ffffff; --text: #1c1c1e; --muted: #8a8a8f; --line: #e5e5ea;
+    --accent: #7b5cf0; --accent-soft: #efeafe; --red: #e5484d; --red-soft: #fdecec; --orange: #e8870e; --orange-soft: #fdf2e3;
+    --green: #2f9e5b; --green-soft: #e6f5ec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #111114; --card: #1c1c20; --text: #f2f2f5; --muted: #8d8d95; --line: #2c2c33;
+      --accent: #9b84ff; --accent-soft: #2a2440; --red-soft: #3a1f22; --orange-soft: #3a2c18; --green-soft: #183224; }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  header { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 10px 12px 6px; border-bottom: 1px solid var(--line); }
+  .top { display: flex; gap: 8px; align-items: center; }
+  .top input { flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 10px; padding: 8px 10px; font-size: 15px; }
+  .btn { border: 0; border-radius: 10px; padding: 8px 12px; font-size: 14px; background: var(--accent-soft); color: var(--accent); cursor: pointer; white-space: nowrap; }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.ghost { background: transparent; color: var(--muted); }
+  .btn.danger { background: var(--red-soft); color: var(--red); }
+  .tabs { display: flex; gap: 6px; overflow-x: auto; padding-top: 8px; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: none; border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 999px; padding: 6px 11px; font-size: 14px; cursor: pointer; }
+  .tab.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .tab .n { opacity: .7; margin-left: 3px; }
+  main { padding: 8px 12px 90px; max-width: 760px; margin: 0 auto; }
+  h3 { margin: 16px 2px 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+  .card { background: var(--card); border-radius: 14px; padding: 10px 12px; margin-bottom: 8px; border: 1px solid var(--line); }
+  .card.busy { opacity: .45; pointer-events: none; }
+  .row1 { display: flex; gap: 8px; align-items: flex-start; }
+  .ico { font-size: 18px; line-height: 22px; }
+  .body { flex: 1; min-width: 0; }
+  .title { font-weight: 600; word-wrap: break-word; cursor: pointer; }
+  .meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+  .b { font-size: 12px; border-radius: 6px; padding: 2px 7px; background: var(--bg); color: var(--muted); }
+  .b.red { background: var(--red-soft); color: var(--red); }
+  .b.orange { background: var(--orange-soft); color: var(--orange); }
+  .b.green { background: var(--green-soft); color: var(--green); }
+  .b.accent { background: var(--accent-soft); color: var(--accent); }
+  .links { margin-top: 6px; font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 10px; }
+  .links a { color: var(--accent); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+  .acts { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .acts .btn { padding: 6px 10px; font-size: 13px; }
+  .snz { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; align-items: center; }
+  .snz input { border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 8px; padding: 5px 6px; font-size: 13px; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 10px; }
+  .sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 20; display: none; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; background: var(--card); border-radius: 16px 16px 0 0; padding: 14px 14px 22px; max-height: 92vh; overflow: auto; display: none; max-width: 760px; margin: 0 auto; }
+  .sheet.on, .sheet-bg.on { display: block; }
+  .sheet label { display: block; font-size: 12px; color: var(--muted); margin: 10px 2px 4px; }
+  .sheet input, .sheet select, .sheet textarea { width: 100%; border: 1px solid var(--line); background: var(--bg); color: var(--text); border-radius: 10px; padding: 9px 10px; font: inherit; }
+  .sheet textarea { min-height: 70px; resize: vertical; }
+  .two { display: flex; gap: 8px; } .two > div { flex: 1; min-width: 0; }
+  .sheet .foot { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .toast { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); background: #1c1c1e; color: #fff; padding: 9px 14px; border-radius: 10px; font-size: 14px; z-index: 30; display: none; max-width: 90%; }
+  .loading { text-align: center; color: var(--muted); padding: 50px; }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <input id="q" type="search" placeholder="Пошук: клієнт, людина, текст…" autocomplete="off">
+    <button class="btn primary" id="addBtn">＋ Задача</button>
+    <button class="btn ghost" id="refresh" title="Оновити">⟳</button>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</header>
+<main id="list"><div class="loading">Завантажую задачі…</div></main>
+
+<div class="sheet-bg" id="bg"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ключ і адреса скрипта приходять у «хвості» посилання (#…) з бота — на сервер GitHub вони не передаються
+const H = new URLSearchParams(location.hash.slice(1).replace(/\?/g, '&'));
+const KEY = (H.get('k') || '').replace(/[^0-9a-z].*$/i, '');
+const API = H.get('api') || '';
+let TAB = (H.get('tab') || 'today').replace(/[^a-z].*$/, '');
+try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {}
+if (TAB === 'control') TAB = 'wait';
+if (!['today', 'mine', 'wait', 'home', 'all', 'history'].includes(TAB)) TAB = 'today';
+let DATA = null, Q = '', OPEN_SNZ = null;
+
+const ICON = { 'Відповісти': '📩', 'Зробити': '🛠', 'Чекаю': '🔔', 'Проконтролювати': '👀', 'Побут': '🏠' };
+const OPEN = ['В роботі', 'Чекаю', 'Відкладено'];
+const TABS = [
+  ['today', 'Сьогодні'], ['mine', 'Від мене'], ['wait', 'Чекаю'],
+  ['home', 'Побут'], ['all', 'Усі'], ['history', 'Готово']
+];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pad = n => (n < 10 ? '0' : '') + n;
+const dayStart = ms => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
+const WD = ['нд', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+function when(ms, withTime) {
+  const d = new Date(ms), days = Math.round((dayStart(ms) - dayStart(Date.now())) / 864e5);
+  const hm = d.getHours() + ':' + pad(d.getMinutes());
+  const day = days === 0 ? 'сьогодні' : days === 1 ? 'завтра' : days === -1 ? 'вчора' : WD[d.getDay()] + ' ' + pad(d.getDate()) + '.' + pad(d.getMonth() + 1);
+  return withTime || !(d.getHours() === 18 && d.getMinutes() === 0) ? day + ' ' + hm : day;
+}
+const toInput = ms => { if (!ms) return ''; const d = new Date(ms); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+
+function toast(t) { const el = $('toast'); el.textContent = t; el.style.display = 'block'; clearTimeout(toast.h); toast.h = setTimeout(() => el.style.display = 'none', 2200); }
+
+// запит до сервера звичайним fetch (працює і в Telegram, і в браузері)
+function call(op, params, ok) {
+  let done = false;
+  const slow = setTimeout(() => { if (!done) toast('Сервер Google відповідає повільно, чекаю…'); }, 8000);
+  const fail = e => { done = true; clearTimeout(slow); toast('Помилка: ' + (e && e.message || e)); console.error(e);
+    if (!DATA) $('list').innerHTML = '<div class="empty">Не вдалося завантажити задачі: ' + esc(e && e.message || e) + '<br><br><button class="btn" onclick="load()">Спробувати ще</button></div>';
+    render(); };
+  const q = new URLSearchParams(Object.assign({ p: 'panel', k: KEY, api: '1', op: op, _: Date.now() }, params));
+  fetch(API + '?' + q.toString())
+    .then(r => r.json())
+    .then(d => { done = true; clearTimeout(slow); if (d.ok) ok(d.data); else fail(d.error); })
+    .catch(fail);
+}
+function load() { call('data', {}, d => { DATA = d; render(); }); }
+
+// ---------- групи ----------
+function groups() {
+  const now = Date.now(), eod = dayStart(now) + 864e5;
+  const open = DATA.tasks.filter(t => OPEN.indexOf(t.status) !== -1 && !t.hidden);
+  const fire = t => t.manual === 'Горить';
+  const overdue = t => t.deadline && dayStart(t.deadline) < dayStart(now);
+  const today = open.filter(t => fire(t) || (t.deadline && t.deadline < eod) || (t.remind && t.remind < eod));
+  return {
+    today: today, all: open,
+    mine: open.filter(t => t.type === 'Відповісти' || t.type === 'Зробити'),
+    wait: open.filter(t => t.type === 'Чекаю' || t.type === 'Проконтролювати'),
+    home: open.filter(t => t.type === 'Побут'),
+    history: DATA.tasks.filter(t => OPEN.indexOf(t.status) === -1).sort((a, b) => (b.closed || 0) - (a.closed || 0)),
+    fire: fire, overdue: overdue
+  };
+}
+function sortOpen(list) {
+  return list.slice().sort((a, b) => ((b.manual === 'Горить') - (a.manual === 'Горить')) || (b.score - a.score) || ((a.remind || 9e15) - (b.remind || 9e15)));
+}
+function match(t) {
+  if (!Q) return true;
+  return (t.title + ' ' + t.client + ' ' + t.who + ' ' + t.chat + ' ' + t.id).toLowerCase().indexOf(Q) !== -1;
+}
+
+// ---------- відмалювання ----------
+function render() {
+  try { renderInner(); } catch (e) {
+    $('list').innerHTML = '<div class="empty">Помилка відображення: ' + esc(e && e.message || e) + '</div>';
+  }
+}
+function renderInner() {
+  if (!DATA) return;
+  const g = groups();
+  $('tabs').innerHTML = TABS.map(([k, n]) => '<button class="tab' + (k === TAB ? ' on' : '') + '" data-tab="' + k + '">' + n +
+    (k !== 'history' ? '<span class="n">' + g[k].filter(match).length + '</span>' : '') + '</button>').join('');
+
+  let sections = [];
+  const list = g[TAB].filter(match);
+  if (TAB === 'today') {
+    const s = sortOpen(list);
+    sections = [['🔥 Горить', s.filter(g.fire)], ['⚠️ Прострочено', s.filter(t => !g.fire(t) && g.overdue(t))],
+      ['📅 На сьогодні', s.filter(t => !g.fire(t) && !g.overdue(t))]];
+  } else if (TAB === 'mine') {
+    const s = sortOpen(list);
+    sections = [['📩 Відповісти', s.filter(t => t.type === 'Відповісти')], ['🛠 Зробити', s.filter(t => t.type === 'Зробити')]];
+  } else if (TAB === 'all') {
+    const s = sortOpen(list);
+    sections = ['Відповісти', 'Зробити', 'Чекаю', 'Побут'].map(ty => [ICON[ty] + ' ' + ty, s.filter(t => t.type === ty || (ty === 'Чекаю' && t.type === 'Проконтролювати'))]);
+  } else if (TAB === 'history') {
+    sections = [['Закрито за 14 днів', list]];
+  } else {
+    sections = [['', TAB === 'wait' ? list.slice().sort((a, b) => (a.created || 0) - (b.created || 0)) : sortOpen(list)]];
+  }
+  const html = sections.filter(s => s[1].length).map(s => (s[0] ? '<h3>' + s[0] + ' · ' + s[1].length + '</h3>' : '') + s[1].map(card).join('')).join('');
+  $('list').innerHTML = html || '<div class="empty">' + (Q ? 'Нічого не знайдено' : TAB === 'today' ? 'На сьогодні все чисто ✨' : 'Порожньо ✨') + '</div>';
+}
+
+function card(t) {
+  const now = Date.now(), closed = OPEN.indexOf(t.status) === -1;
+  const b = [];
+  if (t.manual === 'Горить') b.push('<span class="b red">🔥 горить</span>');
+  else if (t.manual) b.push('<span class="b accent">' + esc(t.manual.toLowerCase()) + '</span>');
+  if (t.deadline && !closed) {
+    const cls = dayStart(t.deadline) < dayStart(now) ? 'red' : dayStart(t.deadline) === dayStart(now) ? 'orange' : '';
+    b.push('<span class="b ' + cls + '">дедлайн ' + when(t.deadline) + '</span>');
+  }
+  if (t.remind && !closed) b.push('<span class="b ' + (t.remind <= now ? 'orange' : '') + '">⏰ ' + when(t.remind, true) + '</span>');
+  if ((t.type === 'Чекаю' || t.type === 'Проконтролювати') && t.created && !closed) {
+    const d = Math.floor((now - t.created) / 864e5);
+    if (d >= 1) b.push('<span class="b' + (d >= 3 ? ' orange' : '') + '">чекаю ' + d + ' дн</span>');
+  }
+  if (closed) b.push('<span class="b ' + (t.status === 'Готово' ? 'green' : '') + '">' + esc(t.status) + (t.closedHow ? ' · ' + esc(t.closedHow) : '') + (t.closed ? ' · ' + when(t.closed, true) : '') + '</span>');
+
+  const who = t.who ? ((t.type === 'Чекаю' || t.type === 'Проконтролювати') ? 'від: ' : '') + t.who : '';
+  const meta = [t.client || t.chat, who].filter(Boolean).map(esc).join(' · ');
+  const links = (t.links || []).slice(0, 4).map(u => '<a href="' + esc(u) + '">📎 ' + esc(u.replace(/^https?:\/\//, '').slice(0, 40)) + '</a>');
+  if (t.link && /^https:\/\//.test(t.link)) links.unshift('<a href="' + esc(t.link) + '">💬 чат</a>');
+
+  let acts;
+  if (closed) acts = '<button class="btn" data-a="reopen">↩️ Повернути</button>';
+  else acts = '<button class="btn" data-a="done">✅ Готово</button><button class="btn" data-a="snzmenu">⏰ Пуш</button>' +
+    '<button class="btn ghost" data-a="fire">' + (t.manual === 'Горить' ? '🔥 Зняти' : '🔥') + '</button><button class="btn ghost" data-a="edit">✏️</button>';
+  let snz = '';
+  if (OPEN_SNZ === t.id && !closed) {
+    snz = '<div class="snz"><button class="btn" data-a="s:1h">1 год</button><button class="btn" data-a="s:tomorrow">Завтра 9:00</button>' +
+      '<button class="btn" data-a="s:monday">Пн 9:00</button><input type="datetime-local" id="snzAt" value="' + toInput(t.remind || now + 3600e3) + '">' +
+      '<button class="btn primary" data-a="s:custom">OK</button></div>';
+  }
+  return '<div class="card" data-id="' + t.id + '"><div class="row1"><div class="ico">' + (ICON[t.type] || '•') + '</div><div class="body">' +
+    '<div class="title" data-a="edit">' + esc(t.title) + '</div>' + (meta ? '<div class="meta">' + meta + ' · ' + t.id + '</div>' : '<div class="meta">' + t.id + '</div>') +
+    (b.length ? '<div class="badges">' + b.join('') + '</div>' : '') + (links.length ? '<div class="links">' + links.join('') + '</div>' : '') +
+    '<div class="acts">' + acts + '</div>' + snz + '</div></div></div>';
+}
+
+// ---------- дії ----------
+function act(id, a, val, msg) {
+  const el = document.querySelector('.card[data-id="' + id + '"]');
+  if (el) el.classList.add('busy');
+  OPEN_SNZ = null;
+  call('action', { id: id, a: a, v: val == null ? '' : (typeof val === 'object' ? JSON.stringify(val) : val) }, d => { DATA = d; render(); if (msg) toast(msg); });
+}
+
+document.addEventListener('click', e => {
+  const tab = e.target.closest('[data-tab]');
+  if (tab) { TAB = tab.dataset.tab; OPEN_SNZ = null; render(); window.scrollTo(0, 0); return; }
+  const btn = e.target.closest('[data-a]');
+  const c = e.target.closest('.card');
+  if (!btn || !c) return;
+  const id = c.dataset.id, a = btn.dataset.a;
+  if (a === 'done') return act(id, 'done', null, '✅ Готово');
+  if (a === 'reopen') return act(id, 'reopen', null, '↩️ Повернула в роботу');
+  if (a === 'fire') return act(id, 'fire', null, '🔥');
+  if (a === 'snzmenu') { OPEN_SNZ = OPEN_SNZ === id ? null : id; render(); return; }
+  if (a === 'edit') return openEdit(id);
+  if (a.indexOf('s:') === 0) {
+    let v = a.slice(2);
+    if (v === 'custom') { v = ($('snzAt') || {}).value; if (!v) return toast('Виберіть час'); }
+    return act(id, 'snooze', v, '⏰ Пуш перенесено');
+  }
+});
+
+// ---------- редагування / нова задача ----------
+function openSheet(html) { $('sheet').innerHTML = html; $('sheet').classList.add('on'); $('bg').classList.add('on'); }
+function closeSheet() { $('sheet').classList.remove('on'); $('bg').classList.remove('on'); }
+$('bg').onclick = closeSheet;
+
+function openEdit(id) {
+  const t = DATA.tasks.find(x => x.id === id);
+  if (!t) return;
+  const closed = OPEN.indexOf(t.status) === -1;
+  const opts = DATA.types.map(ty => '<option' + (ty === t.type ? ' selected' : '') + '>' + ty + '</option>').join('');
+  const pr = ['', 'Горить', 'Високий', 'Низький'].map(p => '<option value="' + p + '"' + (p === t.manual ? ' selected' : '') + '>' + (p || 'звичайний') + '</option>').join('');
+  openSheet('<b>' + (ICON[t.type] || '') + ' ' + t.id + '</b>' + (t.chat ? ' <span class="meta">· ' + esc(t.chat) + '</span>' : '') +
+    '<label>Назва</label><textarea id="eTitle">' + esc(t.title) + '</textarea>' +
+    '<div class="two"><div><label>Тип</label><select id="eType">' + opts + '</select></div><div><label>Пріоритет</label><select id="eMan">' + pr + '</select></div></div>' +
+    '<label>Клієнт / проєкт</label><input id="eClient" list="clients" value="' + esc(t.client) + '"><datalist id="clients">' +
+    DATA.clients.map(c => '<option value="' + esc(c) + '">').join('') + '</datalist>' +
+    '<div class="two"><div><label>Дедлайн (до коли зробити)</label><input id="eDl" type="datetime-local" value="' + toInput(t.deadline) + '"></div>' +
+    '<div><label>Наступний пуш</label><input id="eRm" type="datetime-local" value="' + toInput(t.remind) + '"></div></div>' +
+    '<div class="hint">Дедлайн можна лишити порожнім. Пуш є завжди: не зреагуєте — нагадаю знову.</div>' +
+    '<div class="foot"><button class="btn primary" id="eSave">Зберегти</button>' +
+    (closed ? '' : '<button class="btn danger" id="eNo">✗ Не задача</button>') +
+    '<button class="btn ghost" id="eCancel">Скасувати</button></div>');
+  $('eCancel').onclick = closeSheet;
+  if ($('eNo')) $('eNo').onclick = () => { closeSheet(); act(id, 'notask', null, '✗ Не задача'); };
+  $('eSave').onclick = () => {
+    const v = { title: $('eTitle').value.trim(), type: $('eType').value, client: $('eClient').value.trim(),
+      deadline: $('eDl').value || '', manual: $('eMan').value };
+    if ($('eRm').value && $('eRm').value !== toInput(t.remind)) v.remind = $('eRm').value;
+    closeSheet(); act(id, 'save', v, '💾 Збережено');
+  };
+}
+
+$('addBtn').onclick = () => {
+  openSheet('<b>Нова задача</b><label>Напишіть як боту: можна кілька задач, дедлайн і час пушу</label>' +
+    '<textarea id="nText" placeholder="Напр.: Вудмарт — запросити рахунок після фідбеку по бюджетах, пуш завтра о 10"></textarea>' +
+    '<div class="foot"><button class="btn primary" id="nSave">Додати</button><button class="btn ghost" id="nCancel">Скасувати</button></div>');
+  $('nCancel').onclick = closeSheet;
+  setTimeout(() => $('nText').focus(), 50);
+  $('nSave').onclick = () => {
+    const txt = $('nText').value.trim();
+    if (!txt) return;
+    $('nSave').disabled = true; $('nSave').textContent = 'Розбираю…';
+    call('create', { text: txt }, d => { DATA = d; closeSheet(); render(); toast('👌 Додала: ' + (d.created || []).join(', ')); });
+  };
+};
+
+$('q').addEventListener('input', e => { Q = e.target.value.trim().toLowerCase(); render(); });
+$('refresh').onclick = () => { toast('Оновлюю…'); load(); };
+document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+setInterval(() => { if (!document.hidden && !$('sheet').classList.contains('on') && !OPEN_SNZ) load(); }, 120000);
+if (!KEY || !API) $('list').innerHTML = '<div class="empty">Відкрийте панель кнопкою «Панель» у вашому боті.</div>';
+else load();
+</script>
+</body>
+</html>
