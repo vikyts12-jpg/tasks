@@ -269,6 +269,7 @@ function openEdit(id) {
     DATA.clients.map(c => '<option value="' + esc(c) + '">').join('') + '</datalist>' +
     '<div class="two"><div><label>Дедлайн (до коли зробити)</label><input id="eDl" type="datetime-local" value="' + toInput(t.deadline) + '"></div>' +
     '<div><label>Наступний пуш</label><input id="eRm" type="datetime-local" value="' + toInput(t.remind) + '"></div></div>' +
+    '<label>Прикріплені лінки (кожна з нового рядка)</label><textarea id="eLinks" placeholder="https://…">' + esc((t.links || []).join('\n')) + '</textarea>' +
     '<div class="hint">Дедлайн можна лишити порожнім. Пуш є завжди: не зреагуєте — нагадаю знову.</div>' +
     '<div class="foot"><button class="btn primary" id="eSave">Зберегти</button>' +
     (closed ? '' : '<button class="btn danger" id="eNo">✗ Не задача</button>') +
@@ -277,7 +278,7 @@ function openEdit(id) {
   if ($('eNo')) $('eNo').onclick = () => { closeSheet(); act(id, 'notask', null, '✗ Не задача'); };
   $('eSave').onclick = () => {
     const v = { title: $('eTitle').value.trim(), type: $('eType').value, client: $('eClient').value.trim(),
-      deadline: $('eDl').value || '', manual: $('eMan').value };
+      deadline: $('eDl').value || '', manual: $('eMan').value, links: $('eLinks').value };
     if ($('eRm').value && $('eRm').value !== toInput(t.remind)) v.remind = $('eRm').value;
     closeSheet(); act(id, 'save', v, '💾 Збережено');
   };
